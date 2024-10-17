@@ -1,41 +1,58 @@
 package com.library.biblioteca.service;
 
-
 import java.util.List;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.library.biblioteca.model.Book;
+import com.library.biblioteca.model.BookStatus;
+import com.library.biblioteca.repository.BookRepository;
 
 @Service
 public class BookService {
 
+    @Autowired
+    private BookRepository bookRepository;
+
     public List<Book> findAll() {
-        // Implementar a lógica para buscar todos os livros
-        return null;
+        return bookRepository.findAll();
     }
 
     public Book findById(Long id) {
-        // Implementar a lógica para buscar um livro pelo ID
-        return null;
+        Optional<Book> book = bookRepository.findById(id);
+        return book.orElse(null);
     }
 
     public void create(Book book) {
-        // Implementar a lógica para criar um novo livro
+        bookRepository.save(book);
     }
 
     public boolean update(Book book) {
-        // Implementar a lógica para atualizar um livro
+        if (bookRepository.existsById(book.getId())) {
+            bookRepository.save(book);
+            return true;
+        }
         return false;
     }
 
     public boolean updateStatus(Long id, String status) {
-        // Implementar a lógica para atualizar o status do livro
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        if (optionalBook.isPresent()) {
+            Book book = optionalBook.get();
+            book.setStatus(BookStatus.valueOf(status));
+            bookRepository.save(book);
+            return true;
+        }
         return false;
     }
 
     public boolean delete(Long id) {
-        // Implementar a lógica para inativar um livro
+        if (bookRepository.existsById(id)) {
+            bookRepository.deleteById(id);
+            return true;
+        }
         return false;
     }
 }
