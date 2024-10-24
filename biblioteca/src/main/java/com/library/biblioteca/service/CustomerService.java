@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.library.biblioteca.model.Customer;
+import com.library.biblioteca.model.CustomerStatus;
 import com.library.biblioteca.repository.CustomerRepository;
 
 @Service

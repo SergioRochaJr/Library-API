@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.library.biblioteca.model.Customer;
+import com.library.biblioteca.model.CustomerStatus;
 import com.library.biblioteca.service.CustomerService;
 
 @RestController
