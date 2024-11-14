@@ -1,2 +1,2 @@
 # Library-API
-API para gerenciamento de bibliotexa
+API para gerenciamento de biblioteca
