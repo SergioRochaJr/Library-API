@@ -59,34 +59,26 @@ public class BookController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Book book) {
         try {
-            // Verificar se o status foi enviado e se ele é válido
             if (book.getStatus() != null) {
-                // Tentar converter para String e verificar se é válido
                 try {
-                    String statusStr = book.getStatus().toString(); // Converte para String
+                    String statusStr = book.getStatus().toString();
                     if (!isValidStatus(statusStr)) {
-                        // Se o status não for válido, retorna um erro com os valores válidos
                         ErrorResponse errorResponse = new ErrorResponse("Status inválido. Os valores válidos são: AVAILABLE, BORROWED");
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
                     }
                 } catch (Exception e) {
-                    // Caso ocorra qualquer erro durante a conversão, retorna erro
                     ErrorResponse errorResponse = new ErrorResponse("Erro ao processar o status: " + e.getMessage());
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
                 }
             } else {
-                // Se o status não foi enviado no corpo da requisição, também retorna erro
                 ErrorResponse errorResponse = new ErrorResponse("O status do livro é obrigatório.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
     
-            // Validar outros campos do livro (se necessário)
             validationService.validateBook(book);
-    
-            // Criar o livro
+
             bookService.create(book);
     
-            // Retornar a localização do livro criado
             URI location = ServletUriComponentsBuilder
                             .fromCurrentRequest()
                             .path("/{id}")
@@ -95,19 +87,15 @@ public class BookController {
             return ResponseEntity.created(location).body(book);
     
         } catch (IllegalArgumentException e) {
-            // Caso ocorra um erro de validação, retorna a mensagem de erro
             ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         } catch (Exception e) {
-            // Caso ocorra um erro inesperado, retorna erro genérico
             ErrorResponse errorResponse = new ErrorResponse("Erro inesperado: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
     
-    // Função para validar se o status é um dos valores válidos
     private boolean isValidStatus(String status) {
-        // Compara com os valores do enum (caso o status seja diferente de AVAILABLE ou BORROWED)
         return "AVAILABLE".equals(status) || "BORROWED".equals(status);
     }
     
