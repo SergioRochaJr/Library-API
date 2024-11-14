@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.library.biblioteca.exception.BookValidation;
 import com.library.biblioteca.model.Book;
 import com.library.biblioteca.model.BookStatus;
 import com.library.biblioteca.repository.BookRepository;
@@ -26,22 +27,13 @@ public class BookService {
     }
 
     public void create(Book book) {
+        BookValidation.validate(book); // Validação antes de salvar
         bookRepository.save(book);
     }
 
     public boolean update(Book book) {
+        BookValidation.validate(book); // Validação antes de atualizar
         if (bookRepository.existsById(book.getId())) {
-            bookRepository.save(book);
-            return true;
-        }
-        return false;
-    }
-
-    public boolean updateStatus(Long id, String status) {
-        Optional<Book> optionalBook = bookRepository.findById(id);
-        if (optionalBook.isPresent()) {
-            Book book = optionalBook.get();
-            book.setStatus(BookStatus.valueOf(status));
             bookRepository.save(book);
             return true;
         }
@@ -54,5 +46,17 @@ public class BookService {
             return true;
         }
         return false;
+    }
+
+    // Método para atualizar o status do livro
+    public boolean updateStatus(Long id, BookStatus status) {
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        if (optionalBook.isPresent()) {
+            Book book = optionalBook.get();
+            book.setStatus(status);  // Atualiza o status do livro
+            bookRepository.save(book);  // Salva as alterações no banco de dados
+            return true;
+        }
+        return false;  // Retorna false caso o livro não seja encontrado
     }
 }
