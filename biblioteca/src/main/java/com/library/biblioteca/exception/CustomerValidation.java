@@ -1,10 +1,10 @@
 package com.library.biblioteca.exception;
 
-import com.library.biblioteca.exception.ValidationException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import com.library.biblioteca.model.Customer;
 import com.library.biblioteca.model.CustomerStatus;
-
-import java.time.LocalDate;
 
 public class CustomerValidation {
 
@@ -55,12 +55,14 @@ public class CustomerValidation {
         }
     }
 
-    private static void validateState(String state) {
-        if (state == null || state.trim().isEmpty()) {
-            throw new ValidationException("O estado não pode ser vazio ou nulo.");
+    private static void validateState(BigDecimal state) {
+        if (state == null) {
+            throw new ValidationException("O estado não pode ser nulo.");
         }
-        if (state.length() != 2) {
-            throw new ValidationException("O estado deve ter exatamente 2 caracteres.");
+        BigDecimal minState = BigDecimal.valueOf(1);
+        BigDecimal maxState = BigDecimal.valueOf(50);
+        if (state.compareTo(minState) < 0 || state.compareTo(maxState) > 0) {
+            throw new ValidationException("O estado deve estar entre 1 e 50.");
         }
     }
 

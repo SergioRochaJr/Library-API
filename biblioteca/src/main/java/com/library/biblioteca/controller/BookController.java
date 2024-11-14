@@ -20,7 +20,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.library.biblioteca.model.Book;
 import com.library.biblioteca.model.BookStatus;
+import com.library.biblioteca.model.ErrorResponse;
 import com.library.biblioteca.service.BookService;
+import com.library.biblioteca.service.ValidationService;
 
 @RestController
 @RequestMapping("/api/books")
@@ -29,7 +31,9 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
-    // GET: Retorna todos os livros ou um livro pelo ID
+    @Autowired
+    private ValidationService validationService;
+
     @GetMapping
     public ResponseEntity<List<Book>> getAll(@RequestParam(required = false) Long id) {
         if (id != null) {
@@ -43,7 +47,6 @@ public class BookController {
         }
     }
 
-    // GET: Retorna um livro específico pelo ID
     @GetMapping("/{id}")
     public ResponseEntity<Book> getById(@PathVariable("id") Long id) {
         Book book = bookService.findById(id);
@@ -53,61 +56,64 @@ public class BookController {
         return ResponseEntity.notFound().build();
     }
 
-    // POST: Cria um novo livro
     @PostMapping
-    public ResponseEntity<Book> create(@RequestBody Book book) {
+    public ResponseEntity<?> create(@RequestBody Book book) {
         try {
+            validationService.validateBook(book);
             bookService.create(book);
             URI location = ServletUriComponentsBuilder
-                                .fromCurrentRequest()
-                                .path("/{id}")
-                                .buildAndExpand(book.getId())
-                                .toUri();
+                            .fromCurrentRequest()
+                            .path("/{id}")
+                            .buildAndExpand(book.getId())
+                            .toUri();
             return ResponseEntity.created(location).body(book);
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
-    // PUT: Atualiza os dados de um livro (exceto o status)
     @PutMapping
-    public ResponseEntity<Book> update(@RequestBody Book book) {
+    public ResponseEntity<?> update(@RequestBody Book book) {
         try {
+            validationService.validateBook(book);
             if (bookService.update(book)) {
                 return ResponseEntity.ok(book);
             }
             return ResponseEntity.notFound().build();
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
-    // PATCH: Atualiza o status do livro
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Book> updateStatus(@PathVariable("id") Long id, @RequestParam("status") String status) {
+    public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @RequestParam("status") String status) {
         try {
-            // Verificando se o status é válido e convertendo para o tipo enum BookStatus
-            BookStatus bookStatus = BookStatus.valueOf(status.toUpperCase());  // Converte o status para o enum
+            BookStatus bookStatus = BookStatus.valueOf(status.toUpperCase());
             if (bookService.updateStatus(id, bookStatus)) {
                 return ResponseEntity.ok().build();
             }
             return ResponseEntity.notFound().build();
+
         } catch (IllegalArgumentException e) {
-            // Caso a conversão do status falhe, retorna um erro de BAD_REQUEST
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            ErrorResponse errorResponse = new ErrorResponse("Status inválido: " + status);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 
-    // DELETE: Inativa o livro
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         try {
             if (bookService.delete(id)) {
                 return ResponseEntity.noContent().build();
             }
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            ErrorResponse errorResponse = new ErrorResponse("Erro ao deletar livro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
 }

@@ -37,20 +37,15 @@ public class CustomerService {
 
     // Método para criar um novo cliente com validação
     public void create(Customer customer) {
-        // Chama a validação antes de salvar o cliente
         CustomerValidation.validate(customer);
         customerRepository.save(customer);
     }
 
-    // Método para atualizar um cliente com validação
     public boolean update(Long id, Customer updatedCustomer) {
         Optional<Customer> existingCustomer = customerRepository.findById(id);
         if (existingCustomer.isPresent()) {
             Customer customer = existingCustomer.get();
-            
-            // Chama a validação antes de atualizar
             CustomerValidation.validate(updatedCustomer);
-            
             customer.setName(updatedCustomer.getName());
             customer.setLastname(updatedCustomer.getLastname());
             customer.setAddress(updatedCustomer.getAddress());
@@ -64,7 +59,6 @@ public class CustomerService {
         return false;
     }
 
-    // Método para atualizar o status do cliente
     public boolean updateStatus(Long id, CustomerStatus status) {
         Optional<Customer> existingCustomer = customerRepository.findById(id);
         if (existingCustomer.isPresent()) {
@@ -76,7 +70,6 @@ public class CustomerService {
         return false;
     }
 
-    // Método para deletar o cliente, somente se ele não tiver empréstimos
     public boolean delete(Long id) {
         Optional<Customer> existingCustomer = customerRepository.findById(id);
         if (existingCustomer.isPresent()) {

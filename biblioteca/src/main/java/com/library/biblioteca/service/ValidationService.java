@@ -1,5 +1,8 @@
 package com.library.biblioteca.service;
 
+import java.time.LocalDate;
+import java.util.regex.Pattern;
+
 import org.springframework.stereotype.Service;
 
 import com.library.biblioteca.model.Book;
@@ -28,35 +31,40 @@ public class ValidationService {
         if (customer.getName() == null || customer.getName().isEmpty()) {
             throw new IllegalArgumentException("O nome do cliente não pode ser vazio");
         }
+        
+        // Validação para garantir que o nome contenha apenas letras e espaços
+        if (!customer.getName().matches("^[a-zA-ZÀ-ÿ\\s]+$")) {
+            throw new IllegalArgumentException("Erro de validação: O nome do cliente contém caracteres inválidos");
+        }
+    
         if (customer.getLastname() == null || customer.getLastname().isEmpty()) {
             throw new IllegalArgumentException("O sobrenome do cliente não pode ser vazio");
         }
+    
         if (customer.getAddress() == null || customer.getAddress().isEmpty()) {
             throw new IllegalArgumentException("O endereço do cliente não pode ser vazio");
-        }
-        if (customer.getCity() == null || customer.getCity().isEmpty()) {
-            throw new IllegalArgumentException("A cidade do cliente não pode ser vazia");
-        }
-        if (customer.getState() == null) {
-            throw new IllegalArgumentException("O estado do cliente não pode ser vazio");
-        }
-        if (customer.getCountry() == null || customer.getCountry().isEmpty()) {
-            throw new IllegalArgumentException("O país do cliente não pode ser vazio");
-        }
-        if (customer.getBirthDate() == null) {
-            throw new IllegalArgumentException("A data de nascimento do cliente não pode ser vazia");
         }
     }
 
     public void validateLoan(Loan loan) {
+        if (loan.getLoanDate() == null || loan.getLoanDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("A data do empréstimo é inválida.");
+        }
         if (loan.getCustomer() == null) {
-            throw new IllegalArgumentException("O cliente do empréstimo não pode ser nulo");
+            throw new IllegalArgumentException("O empréstimo deve ter um cliente associado.");
         }
         if (loan.getBooks() == null || loan.getBooks().isEmpty()) {
-            throw new IllegalArgumentException("A lista de livros não pode ser vazia");
+            throw new IllegalArgumentException("O empréstimo deve ter ao menos um livro.");
         }
-        if (loan.getLoanDate() == null) {
-            throw new IllegalArgumentException("A data do empréstimo não pode ser vazia");
-        }
+    }
+
+    private boolean isValidName(String name) {
+        String regex = "^[a-zA-Z\\s]+$";
+        return Pattern.matches(regex, name);
+    }
+
+    private boolean isValidAddress(String address) {
+        String regex = "^[a-zA-Z0-9,\\s]+$";
+        return Pattern.matches(regex, address);
     }
 }

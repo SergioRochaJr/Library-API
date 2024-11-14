@@ -33,18 +33,13 @@ public class BookService {
         return false;
     }
 
-    public boolean updateStatus(Long id, String status) {
+    public boolean updateStatus(Long id, BookStatus status) {
         Optional<Book> bookOpt = bookRepository.findById(id);
         if (bookOpt.isPresent()) {
-            try {
-                BookStatus bookStatus = BookStatus.valueOf(status.toUpperCase());  // Converte para enum
-                Book book = bookOpt.get();
-                book.setStatus(bookStatus);
-                bookRepository.save(book);
-                return true;
-            } catch (IllegalArgumentException e) {
-                return false;  // Se o status for inválido, retorna false
-            }
+            Book book = bookOpt.get();
+            book.setStatus(status);
+            bookRepository.save(book);
+            return true;
         }
         return false;
     }

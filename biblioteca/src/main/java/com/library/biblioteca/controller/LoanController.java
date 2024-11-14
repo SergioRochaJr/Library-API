@@ -1,15 +1,27 @@
 package com.library.biblioteca.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import com.library.biblioteca.model.Loan;
-import com.library.biblioteca.service.LoanService;
-
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.library.biblioteca.model.ErrorResponse;
+import com.library.biblioteca.model.Loan;
+import com.library.biblioteca.service.LoanService;
+import com.library.biblioteca.service.ValidationService;
 
 @RestController
 @RequestMapping("/api/loans")
@@ -17,6 +29,9 @@ public class LoanController {
 
     @Autowired
     private LoanService loanService;
+
+    @Autowired
+    private ValidationService validationService;
 
     @GetMapping
     public ResponseEntity<List<Loan>> getAll() {
@@ -43,23 +58,35 @@ public class LoanController {
     }
 
     @PostMapping
-    public ResponseEntity<Loan> create(@RequestBody Loan loan) {
-        Loan createdLoan = loanService.create(loan);
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdLoan.getId())
-                .toUri();
-        return ResponseEntity.created(location).body(createdLoan);
+    public ResponseEntity<Object> create(@RequestBody Loan loan) {
+        try {
+            validationService.validateLoan(loan);
+            Loan createdLoan = loanService.create(loan);
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(createdLoan.getId())
+                    .toUri();
+            return ResponseEntity.created(location).body(createdLoan);
+        } catch (IllegalArgumentException e) {
+            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Loan> update(@PathVariable Long id, @RequestBody Loan loan) {
-        loan.setId(id);
-        if (loanService.update(loan)) {
-            return ResponseEntity.ok(loan);
+    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody Loan loan) {
+        try {
+            loan.setId(id);
+            validationService.validateLoan(loan);
+            if (loanService.update(loan)) {
+                return ResponseEntity.ok(loan);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

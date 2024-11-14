@@ -16,5 +16,9 @@ public class LoanValidation {
         if (loan.getCustomer() == null) {
             throw new ValidationException("O cliente do empréstimo é obrigatório.");
         }
+
+        if (loan.getBooks() == null || loan.getBooks().isEmpty()) {
+            throw new ValidationException("É necessário associar pelo menos um livro ao empréstimo.");
+        }
     }
 }
