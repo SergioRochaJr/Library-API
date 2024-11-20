@@ -1,10 +1,12 @@
 package com.library.biblioteca.service;
 
 import java.time.LocalDate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
+import com.library.biblioteca.exception.ValidationException;
 import com.library.biblioteca.model.Book;
 import com.library.biblioteca.model.Customer;
 import com.library.biblioteca.model.Loan;
@@ -12,18 +14,41 @@ import com.library.biblioteca.model.Loan;
 @Service
 public class ValidationService {
 
+    // Validações para o livro
     public void validateBook(Book book) {
-        if (book.getTitle() == null || book.getTitle().isEmpty()) {
-            throw new IllegalArgumentException("O título do livro não pode ser vazio");
+        validateIsbn(book.getIsbn());
+        validateAuthor(book.getAuthor());
+    }
+
+    // Valida o formato do ISBN (978-0261103573)
+    private void validateIsbn(String isbn) {
+        if (isbn == null || isbn.isEmpty()) {
+            throw new ValidationException("O ISBN é obrigatório.");
         }
-        if (book.getAuthor() == null || book.getAuthor().isEmpty()) {
-            throw new IllegalArgumentException("O autor do livro não pode ser vazio");
+     
+        // Expressão regular para o formato do ISBN: 978-0261103573
+        String isbnPattern = "\\d{3}-\\d{10}"; 
+        Pattern pattern = Pattern.compile(isbnPattern);
+        Matcher matcher = pattern.matcher(isbn);
+
+        if (!matcher.matches()) {
+            throw new ValidationException("O ISBN deve estar no formato: xxx-xxxxxxxxxx (3 dígitos, hífen, 10 dígitos).");
         }
-        if (book.getIsbn() == null || book.getIsbn().isEmpty()) {
-            throw new IllegalArgumentException("O ISBN do livro não pode ser vazio");
+    }
+
+    // Valida o nome do autor (sem caracteres especiais, mas permite hífens)
+    private void validateAuthor(String author) {
+        if (author == null || author.isEmpty()) {
+            throw new ValidationException("O autor é obrigatório.");
         }
-        if (book.getPublishedDate() == null) {
-            throw new IllegalArgumentException("A data de publicação do livro não pode ser vazia");
+
+        // Expressão regular para permitir letras, espaços e hífens, mas não permite caracteres especiais
+        String authorPattern = "^[A-Za-zÀ-ÿ0-9\\s-]+$";  // Letras, números, espaços e hífens
+        Pattern pattern = Pattern.compile(authorPattern);
+        Matcher matcher = pattern.matcher(author);
+
+        if (!matcher.matches()) {
+            throw new ValidationException("O nome do autor não pode conter caracteres especiais.");
         }
     }
 
@@ -57,7 +82,6 @@ public class ValidationService {
             throw new IllegalArgumentException("O empréstimo deve ter ao menos um livro.");
         }
     }
-
     private boolean isValidName(String name) {
         String regex = "^[a-zA-Z\\s]+$";
         return Pattern.matches(regex, name);
@@ -67,4 +91,5 @@ public class ValidationService {
         String regex = "^[a-zA-Z0-9,\\s]+$";
         return Pattern.matches(regex, address);
     }
+
 }

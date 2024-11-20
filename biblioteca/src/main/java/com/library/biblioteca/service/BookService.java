@@ -4,7 +4,7 @@ import com.library.biblioteca.dto.BookDTO;
 import com.library.biblioteca.model.Book;
 import com.library.biblioteca.model.BookStatus;
 import com.library.biblioteca.repository.BookRepository;
-import com.library.biblioteca.util.BookMapper;  // Supondo que você tenha um mapper
+import com.library.biblioteca.util.BookMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,19 +19,19 @@ public class BookService {
     private BookRepository bookRepository;
 
     @Autowired
-    private ValidationService validationService;
+    private ValidationService validationService;  // Serviço de validação centralizado
 
     // Criar livro (agora recebe um BookDTO)
     public void create(BookDTO bookDTO) {
         Book book = BookMapper.toEntity(bookDTO);  // Convertendo para a entidade Book
-        validationService.validateBook(book);
+        validationService.validateBook(book);  // Validação centralizada
         bookRepository.save(book);
     }
 
     // Atualizar livro (agora recebe um BookDTO)
     public boolean update(BookDTO bookDTO) {
         Book book = BookMapper.toEntity(bookDTO);  // Convertendo para a entidade Book
-        validationService.validateBook(book);
+        validationService.validateBook(book);  // Validação centralizada
         if (bookRepository.existsById(book.getId())) {
             bookRepository.save(book);
             return true;

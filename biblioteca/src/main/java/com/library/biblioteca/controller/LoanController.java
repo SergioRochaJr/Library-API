@@ -19,6 +19,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.library.biblioteca.dto.LoanDTO;
 import com.library.biblioteca.model.ErrorResponse;
 import com.library.biblioteca.model.Loan;
+import com.library.biblioteca.dto.CustomerDTO;
+import com.library.biblioteca.dto.LoanDTO;
 import com.library.biblioteca.service.LoanService;
 import com.library.biblioteca.service.ValidationService;
 import com.library.biblioteca.util.LoanMapper;
@@ -62,14 +64,27 @@ public class LoanController {
         @ApiResponse(responseCode = "200", description = "Empréstimo encontrado", content = @Content(schema = @Schema(implementation = LoanDTO.class))),
         @ApiResponse(responseCode = "404", description = "Empréstimo não encontrado")
     })
-    public ResponseEntity<LoanDTO> getById(@PathVariable Long id) {
-        Loan loan = loanService.findById(id);
-        if (loan != null) {
-            LoanDTO loanDTO = LoanMapper.toDTO(loan);
-            return ResponseEntity.ok(loanDTO);
-        }
-        return ResponseEntity.notFound().build();
+public ResponseEntity<LoanDTO> getById(@PathVariable Long id) {
+    Loan loan = loanService.findById(id);
+    if (loan != null) {
+        // Convertendo o Loan para LoanDTO, com CustomerDTO no lugar de Customer
+        CustomerDTO customerDTO = new CustomerDTO(loan.getCustomer().getId(),
+                loan.getCustomer().getName(),
+                loan.getCustomer().getLastname(),
+                loan.getCustomer().getAddress(),
+                loan.getCustomer().getCity(),
+                loan.getCustomer().getState(),
+                loan.getCustomer().getCountry(),
+                loan.getCustomer().getBirthDate(),
+                loan.getCustomer().getStatus());
+
+        LoanDTO loanDTO = new LoanDTO(loan.getId(), customerDTO, loan.getBooks(), loan.getLoanDate(), loan.getReturnDate(), loan.getStatus());
+        return ResponseEntity.ok(loanDTO);
+
     }
+    return ResponseEntity.notFound().build();
+}
+
 
     @GetMapping("/customer/{customerId}")
     @Operation(

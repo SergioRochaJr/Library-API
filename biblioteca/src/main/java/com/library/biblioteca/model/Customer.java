@@ -56,17 +56,17 @@ public class Customer implements Serializable {
     }
 
     public Customer(Long id, String name, String lastname, String address, String city, BigDecimal state, String country, LocalDate birthDate, CustomerStatus status) {
-        this.id = id;
-        this.name = name;
-        this.lastname = lastname;
-        this.address = address;
-        this.city = city;
-        this.state = state;
-        this.country = country;
-        this.birthDate = birthDate;
-        this.status = status;
-    }
-    
+    this.id = id;
+    this.name = name;
+    this.lastname = lastname;
+    this.address = address;
+    this.city = city;
+    this.state = state;
+    this.country = country;
+    this.birthDate = birthDate;
+    this.status = status;
+}
+
 
     public Customer(Long id) {
         this.id = id;

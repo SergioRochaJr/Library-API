@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.library.biblioteca.model.Book;
-import com.library.biblioteca.model.Customer;
 import com.library.biblioteca.model.LoanStatus;
 
 public class LoanDTO {
+
     private Long id;
-    private Customer customer;
+    private CustomerDTO customer;  // Mudando de Customer para CustomerDTO
     private List<Book> books;
     private LocalDate loanDate;
     private LocalDate returnDate;
@@ -19,7 +19,7 @@ public class LoanDTO {
     public LoanDTO() {}
 
     // Construtor com todos os parâmetros
-    public LoanDTO(Long id, Customer customer, List<Book> books, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
+    public LoanDTO(Long id, CustomerDTO customer, List<Book> books, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
         this.id = id;
         this.customer = customer;
         this.books = books;
@@ -37,11 +37,11 @@ public class LoanDTO {
         this.id = id;
     }
 
-    public Customer getCustomer() {
+    public CustomerDTO getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public void setCustomer(CustomerDTO customer) {
         this.customer = customer;
     }
 
