@@ -25,8 +25,13 @@ import com.library.biblioteca.service.BookService;
 import com.library.biblioteca.service.ValidationService;
 import com.library.biblioteca.util.BookMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/books")
+@Tag(name = "Books", description = "Endpoints para gerenciamento de livros")
 public class BookController {
 
     @Autowired
@@ -36,6 +41,8 @@ public class BookController {
     private ValidationService validationService;
 
     @GetMapping
+    @Operation(summary = "Listar livros", description = "Retorna todos os livros ou um específico, baseado no ID")
+    @ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso")
     public ResponseEntity<List<BookDTO>> getAll(@RequestParam(required = false) Long id) {
         if (id != null) {
             BookDTO bookDTO = bookService.findById(id);
@@ -49,6 +56,9 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Obter livro por ID", description = "Busca os detalhes de um livro pelo ID")
+    @ApiResponse(responseCode = "200", description = "Livro encontrado")
+    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     public ResponseEntity<BookDTO> getById(@PathVariable("id") Long id) {
         BookDTO bookDTO = bookService.findById(id);
         if (bookDTO != null) {
@@ -58,6 +68,9 @@ public class BookController {
     }
 
     @PostMapping
+    @Operation(summary = "Criar livro", description = "Adiciona um novo livro ao sistema")
+    @ApiResponse(responseCode = "201", description = "Livro criado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Erro de validação")
     public ResponseEntity<?> create(@RequestBody BookDTO bookDTO) {
         try {
             validationService.validateBook(BookMapper.toEntity(bookDTO));  // Validando a entidade
@@ -76,6 +89,9 @@ public class BookController {
     }
 
     @PutMapping
+    @Operation(summary = "Atualizar livro", description = "Atualiza as informações de um livro existente")
+    @ApiResponse(responseCode = "200", description = "Livro atualizado com sucesso")
+    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     public ResponseEntity<?> update(@RequestBody BookDTO bookDTO) {
         try {
             validationService.validateBook(BookMapper.toEntity(bookDTO));  // Validando a entidade
@@ -91,6 +107,9 @@ public class BookController {
     }
 
     @PatchMapping("/{id}/status")
+    @Operation(summary = "Alterar status do livro", description = "Modifica o status de disponibilidade do livro")
+    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso")
+    @ApiResponse(responseCode = "400", description = "Status inválido")
     public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @RequestParam("status") String status) {
         try {
             BookStatus bookStatus = BookStatus.valueOf(status.toUpperCase());
@@ -106,6 +125,9 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Excluir livro", description = "Remove um livro do sistema")
+    @ApiResponse(responseCode = "204", description = "Livro excluído com sucesso")
+    @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         try {
             if (bookService.delete(id)) {
