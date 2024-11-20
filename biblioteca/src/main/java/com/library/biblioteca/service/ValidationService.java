@@ -55,7 +55,7 @@ public class ValidationService {
     public void validateCustomer(Customer customer) {
         if (customer.getName() == null || customer.getName().isEmpty()) {
             throw new IllegalArgumentException("O nome do cliente não pode ser vazio");
-        }
+        }   
         
         // Validação para garantir que o nome contenha apenas letras e espaços
         if (!customer.getName().matches("^[a-zA-ZÀ-ÿ\\s]+$")) {

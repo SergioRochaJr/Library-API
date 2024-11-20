@@ -43,16 +43,8 @@ public class BookController {
     @GetMapping
     @Operation(summary = "Listar livros", description = "Retorna todos os livros ou um específico, baseado no ID")
     @ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso")
-    public ResponseEntity<List<BookDTO>> getAll(@RequestParam(required = false) Long id) {
-        if (id != null) {
-            BookDTO bookDTO = bookService.findById(id);
-            if (bookDTO != null) {
-                return ResponseEntity.ok(List.of(bookDTO));
-            }
-            return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(bookService.findAll());
-        }
+    public ResponseEntity<List<BookDTO>> getAll() {
+        return ResponseEntity.ok(bookService.findAll());
     }
 
     @GetMapping("/{id}")
