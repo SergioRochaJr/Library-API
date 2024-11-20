@@ -20,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.library.biblioteca.dto.BookDTO;
 import com.library.biblioteca.model.BookStatus;
-import com.library.biblioteca.exception.ErrorResponse;
+import com.library.biblioteca.model.ErrorResponse;
 import com.library.biblioteca.service.BookService;
 import com.library.biblioteca.service.ValidationService;
 import com.library.biblioteca.util.BookMapper;
@@ -64,8 +64,7 @@ public class BookController {
         if (bookDTO != null) {
             return ResponseEntity.ok(bookDTO);
         }
-        ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
@@ -74,7 +73,7 @@ public class BookController {
     @ApiResponse(responseCode = "400", description = "Erro de validação")
     public ResponseEntity<?> create(@RequestBody BookDTO bookDTO) {
         try {
-            validationService.validateBook(BookMapper.toEntity(bookDTO));  // Validando a entidade
+            validationService.validateBook(BookMapper.toEntity(bookDTO));
             bookService.create(bookDTO);
             URI location = ServletUriComponentsBuilder
                             .fromCurrentRequest()
@@ -95,7 +94,7 @@ public class BookController {
     @ApiResponse(responseCode = "404", description = "Livro não encontrado")
     public ResponseEntity<?> update(@RequestBody BookDTO bookDTO) {
         try {
-            validationService.validateBook(BookMapper.toEntity(bookDTO));  // Validando a entidade
+            validationService.validateBook(BookMapper.toEntity(bookDTO));
             if (bookService.update(bookDTO)) {
                 return ResponseEntity.ok(bookDTO);
             }
