@@ -38,7 +38,7 @@ public class Book implements Serializable {
     @Column(name = "status", nullable = false)
     private BookStatus status;
 
-    public Book(Long long1, String string, String string2, String string3, LocalDate localDate, String string4) {
+    public Book() {
     }
 
     public Book(Long id, String title, String author, String isbn, LocalDate publishedDate, BookStatus status) {
