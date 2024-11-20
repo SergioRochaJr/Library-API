@@ -18,6 +18,7 @@ public class ValidationService {
     public void validateBook(Book book) {
         validateIsbn(book.getIsbn());
         validateAuthor(book.getAuthor());
+        validateTitle(book.getTitle());
     }
 
     // Valida o formato do ISBN (978-0261103573)
@@ -37,6 +38,11 @@ public class ValidationService {
     }
 
     // Valida o nome do autor (sem caracteres especiais, mas permite hífens)
+    private void validateTitle(String title) {
+        if (title == null || title.isEmpty()) {
+            throw new ValidationException("O título do livro é obrigatório.");
+        }
+    }
     private void validateAuthor(String author) {
         if (author == null || author.isEmpty()) {
             throw new ValidationException("O autor é obrigatório.");
@@ -82,14 +88,6 @@ public class ValidationService {
             throw new IllegalArgumentException("O empréstimo deve ter ao menos um livro.");
         }
     }
-    private boolean isValidName(String name) {
-        String regex = "^[a-zA-Z\\s]+$";
-        return Pattern.matches(regex, name);
-    }
 
-    private boolean isValidAddress(String address) {
-        String regex = "^[a-zA-Z0-9,\\s]+$";
-        return Pattern.matches(regex, address);
-    }
 
 }
