@@ -20,7 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.library.biblioteca.dto.BookDTO;
 import com.library.biblioteca.model.BookStatus;
-import com.library.biblioteca.model.ErrorResponse;
+import com.library.biblioteca.exception.ErrorResponse;
 import com.library.biblioteca.service.BookService;
 import com.library.biblioteca.service.ValidationService;
 import com.library.biblioteca.util.BookMapper;
@@ -56,7 +56,8 @@ public class BookController {
         if (bookDTO != null) {
             return ResponseEntity.ok(bookDTO);
         }
-        return ResponseEntity.notFound().build();
+        ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @PostMapping

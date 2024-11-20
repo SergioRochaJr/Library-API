@@ -20,7 +20,6 @@ import com.library.biblioteca.dto.LoanDTO;
 import com.library.biblioteca.model.ErrorResponse;
 import com.library.biblioteca.model.Loan;
 import com.library.biblioteca.dto.CustomerDTO;
-import com.library.biblioteca.dto.LoanDTO;
 import com.library.biblioteca.service.LoanService;
 import com.library.biblioteca.service.ValidationService;
 import com.library.biblioteca.util.LoanMapper;
