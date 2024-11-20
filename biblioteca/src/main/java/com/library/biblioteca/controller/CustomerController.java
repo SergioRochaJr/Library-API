@@ -48,15 +48,22 @@ public class CustomerController {
     private ValidationService validationService;
 
     @GetMapping
-    @Operation(summary = "Listar clientes", description = "Retorna todos os clientes")
+    @Operation(summary = "Listar clientes", description = "Retorna todos os clientes ou busca por nome")
     @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso")
-    public ResponseEntity<List<CustomerDTO>> getAll() {
-        List<Customer> customers = customerService.findAll();
+    public ResponseEntity<List<CustomerDTO>> getAll(@RequestParam(required = false) String name) {
+        List<Customer> customers;
+        if (name != null && !name.isEmpty()) {
+            customers = customerService.findByName(name);
+        } else {
+            customers = customerService.findAll();
+        }
         List<CustomerDTO> customerDTOs = customers.stream()
                                                   .map(CustomerMapper::toDTO)
                                                   .collect(Collectors.toList());
         return ResponseEntity.ok(customerDTOs);
     }
+
+
     @GetMapping("/{id}")
     @Operation(summary = "Obter cliente por ID", description = "Busca os detalhes de um cliente pelo ID")
     @ApiResponse(responseCode = "200", description = "Cliente encontrado")
