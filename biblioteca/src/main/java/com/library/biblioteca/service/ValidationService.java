@@ -57,6 +57,8 @@ public class ValidationService {
             throw new ValidationException("O nome do autor não pode conter caracteres especiais.");
         }
     }
+    
+    
 
     public void validateCustomer(Customer customer) {
         if (customer.getName() == null || customer.getName().isEmpty()) {
