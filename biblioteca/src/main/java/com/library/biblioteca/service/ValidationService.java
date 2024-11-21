@@ -14,20 +14,17 @@ import com.library.biblioteca.model.Loan;
 @Service
 public class ValidationService {
 
-    // Validações para o livro
     public void validateBook(Book book) {
         validateIsbn(book.getIsbn());
         validateAuthor(book.getAuthor());
         validateTitle(book.getTitle());
     }
 
-    // Valida o formato do ISBN (978-0261103573)
     private void validateIsbn(String isbn) {
         if (isbn == null || isbn.isEmpty()) {
             throw new ValidationException("O ISBN é obrigatório.");
         }
      
-        // Expressão regular para o formato do ISBN: 978-0261103573
         String isbnPattern = "\\d{3}-\\d{10}"; 
         Pattern pattern = Pattern.compile(isbnPattern);
         Matcher matcher = pattern.matcher(isbn);
@@ -37,7 +34,6 @@ public class ValidationService {
         }
     }
 
-    // Valida o nome do autor (sem caracteres especiais, mas permite hífens)
     private void validateTitle(String title) {
         if (title == null || title.isEmpty()) {
             throw new ValidationException("O título do livro é obrigatório.");
@@ -48,8 +44,7 @@ public class ValidationService {
             throw new ValidationException("O autor é obrigatório.");
         }
 
-        // Expressão regular para permitir letras, espaços e hífens, mas não permite caracteres especiais
-        String authorPattern = "^[A-Za-zÀ-ÿ0-9\\s-.]+$";  // Letras, números, espaços e hífens
+        String authorPattern = "^[A-Za-zÀ-ÿ0-9\\s-.]+$";
         Pattern pattern = Pattern.compile(authorPattern);
         Matcher matcher = pattern.matcher(author);
 
@@ -65,7 +60,6 @@ public class ValidationService {
             throw new IllegalArgumentException("O nome do cliente não pode ser vazio");
         }   
         
-        // Validação para garantir que o nome contenha apenas letras e espaços
         if (!customer.getName().matches("^[a-zA-ZÀ-ÿ\\s]+$")) {
             throw new IllegalArgumentException("Erro de validação: O nome do cliente contém caracteres inválidos");
         }

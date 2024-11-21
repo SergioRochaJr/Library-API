@@ -28,7 +28,7 @@ public class BookService {
     private LoanRepository loanRepository;
 
     @Autowired
-    private ValidationService validationService;  // Serviço de validação centralizado
+    private ValidationService validationService;
 
 
     public void create(BookDTO bookDTO) {
@@ -64,43 +64,36 @@ public class BookService {
         return false;
     }
 
-    // Buscar livro por ID (agora retorna um BookDTO)
     public BookDTO findById(Long id) {
         Book book = bookRepository.findById(id).orElse(null);
-        return BookMapper.toDTO(book);  // Convertendo a entidade para DTO
+        return BookMapper.toDTO(book);
     }
 
-    // Listar todos os livros (agora retorna uma lista de BookDTO)
     public List<BookDTO> findAll() {
         List<Book> books = bookRepository.findAll();
         return books.stream()
-                .map(BookMapper::toDTO)  // Convertendo para DTO
+                .map(BookMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     public boolean delete(Long id) {
-        // Verificar se o livro existe
+
         Optional<Book> optionalBook = bookRepository.findById(id);
         if (optionalBook.isPresent()) {
             Book book = optionalBook.get();
     
-            // Buscar todos os empréstimos que possuem o livro no relacionamento
             List<Loan> loans = loanRepository.findBookById(id);
-    
-            // Verificar se todos os empréstimos possuem status RETURNED
+
             boolean allLoansReturned = loans.stream()
                     .allMatch(loan -> loan.getStatus() == LoanStatus.RETURNED);
     
-            // Verificar se o status do livro não é BORROWED
             boolean bookIsNotBorrowed = book.getStatus() != BookStatus.BORROWED;
     
-            // Se todos os empréstimos estiverem com status RETURNED e o livro não estiver com status BORROWED, excluir o livro
             if (allLoansReturned && bookIsNotBorrowed) {
                 bookRepository.deleteById(id);
-                return true;  // Livro excluído com sucesso
+                return true;
             }
         }
-        // Caso o livro tenha empréstimos não retornados ou o status do livro seja BORROWED
         return false;
     }
     

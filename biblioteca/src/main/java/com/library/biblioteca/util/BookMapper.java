@@ -5,7 +5,6 @@ import com.library.biblioteca.model.Book;
 
 public class BookMapper {
 
-    // Converte a entidade Book para DTO
     public static BookDTO toDTO(Book book) {
         if (book == null) {
             return null;
@@ -20,7 +19,6 @@ public class BookMapper {
         );
     }
 
-    // Converte o DTO BookDTO para entidade Book
     public static Book toEntity(BookDTO bookDTO) {
         if (bookDTO == null) {
             return null;

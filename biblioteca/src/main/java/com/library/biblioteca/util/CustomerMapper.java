@@ -5,7 +5,6 @@ import com.library.biblioteca.model.Customer;
 
 public class CustomerMapper {
 
-    // Converter Customer para CustomerDTO
     public static CustomerDTO toDTO(Customer customer) {
         if (customer == null) {
             return null;
@@ -23,7 +22,6 @@ public class CustomerMapper {
         );
     }
 
-    // Converter CustomerDTO para Customer
     public static Customer toEntity(CustomerDTO customerDTO) {
         if (customerDTO == null) {
             return null;
