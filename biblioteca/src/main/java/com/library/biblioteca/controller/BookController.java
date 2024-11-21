@@ -49,21 +49,21 @@ public ResponseEntity<Object> getAll(@RequestParam(required = false) Long id) {
     if (id != null) {
         BookDTO bookDTO = bookService.findById(id);
         if (bookDTO != null) {
-            // Se encontrar o livro, retorna a resposta de sucesso com o livro encontrado
+
             SuccessResponse successResponse = new SuccessResponse("Livro encontrado com sucesso", List.of(bookDTO));
             return ResponseEntity.ok(successResponse);
         }
-        // Se não encontrar o livro, retorna um erro 404 com a mensagem
+
         ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado com o ID " + id);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     } else {
         List<BookDTO> books = bookService.findAll();
         if (books.isEmpty()) {
-            // Se não houver livros na lista, retorna erro 404 com uma mensagem apropriada
+
             ErrorResponse errorResponse = new ErrorResponse("Nenhum livro encontrado");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        // Se livros forem encontrados, retorna a resposta de sucesso
+
         SuccessResponse successResponse = new SuccessResponse("Lista de livros retornada com sucesso", books);
         return ResponseEntity.ok(successResponse);
 

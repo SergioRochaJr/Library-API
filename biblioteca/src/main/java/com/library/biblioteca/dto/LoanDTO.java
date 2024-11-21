@@ -9,16 +9,14 @@
     public class LoanDTO {
 
         private Long id;
-        private CustomerDTO customer;  // Mudando de Customer para CustomerDTO
+        private CustomerDTO customer;
         private List<Book> books;
         private LocalDate loanDate;
         private LocalDate returnDate;
         private LoanStatus status;
 
-        // Construtor sem argumentos
         public LoanDTO() {}
 
-        // Construtor com todos os parâmetros
         public LoanDTO(Long id, CustomerDTO customer, List<Book> books, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
             this.id = id;
             this.customer = customer;
@@ -28,7 +26,6 @@
             this.status = status;
         }
 
-        // Getters e Setters
         public Long getId() {
             return id;
         }

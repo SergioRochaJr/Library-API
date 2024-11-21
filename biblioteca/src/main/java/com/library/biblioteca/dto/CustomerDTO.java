@@ -17,10 +17,8 @@ public class CustomerDTO {
     private LocalDate birthDate;
     private CustomerStatus status;
 
-    // Construtor padrão
     public CustomerDTO() {}
 
-    // Construtor com todos os parâmetros
     public CustomerDTO(Long id, String name, String lastname, String address, String city, BigDecimal state, 
                        String country, LocalDate birthDate, CustomerStatus status) {
         this.id = id;
@@ -33,8 +31,6 @@ public class CustomerDTO {
         this.birthDate = birthDate;
         this.status = status;
     }
-
-    // Getters e Setters
 
     public Long getId() {
         return id;

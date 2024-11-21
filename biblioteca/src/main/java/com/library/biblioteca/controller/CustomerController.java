@@ -125,8 +125,8 @@ public class CustomerController {
 public ResponseEntity<Object> create(@RequestBody CustomerDTO customerDTO) {
     try {
         Customer customer = CustomerMapper.toEntity(customerDTO);
-        validationService.validateCustomer(customer);  // Valida os dados
-        customerService.create(customerDTO);  // Cria o cliente no banco
+        validationService.validateCustomer(customer); 
+        customerService.create(customerDTO);  
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -134,12 +134,12 @@ public ResponseEntity<Object> create(@RequestBody CustomerDTO customerDTO) {
                 .buildAndExpand(customer.getId())
                 .toUri();
         
-        // Resposta de sucesso com o objeto CustomerDTO e a URI no cabeçalho Location
+    
         SuccessResponse successResponse = new SuccessResponse("Cliente criado com sucesso!", CustomerMapper.toDTO(customer));
         return ResponseEntity.created(location).body(successResponse);
         
     } catch (IllegalArgumentException e) {
-        // Resposta de erro com a mensagem de validação
+   
         ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -158,25 +158,25 @@ public ResponseEntity<Object> create(@RequestBody CustomerDTO customerDTO) {
 })
 public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody CustomerDTO customerDTO) {
     try {
-        // Mapeia o DTO para entidade para atualizar no banco de dados
+    
         Customer customer = CustomerMapper.toEntity(customerDTO);
-        // Valida os dados do cliente
+
         validationService.validateCustomer(customer);
 
-        // Se a atualização for bem-sucedida
+
         if (customerService.update(id, customerDTO)) {
             SuccessResponse successResponse = new SuccessResponse("Cliente atualizado com sucesso!", CustomerMapper.toDTO(customer));
-            return ResponseEntity.ok(successResponse);  // Retorna a resposta de sucesso com os dados do cliente
+            return ResponseEntity.ok(successResponse);  
         }
 
-        // Caso o cliente não seja encontrado
+   
         ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta de erro 404
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 
     } catch (IllegalArgumentException e) {
-        // Caso haja um erro de validação
+
         ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);  // Retorna a resposta de erro 400
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);  
     }
 }
 
@@ -190,16 +190,16 @@ public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody Custome
                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
 })
 public ResponseEntity<Object> updateStatus(@PathVariable Long id, @RequestParam CustomerStatus status) {
-    // Verifica se o status foi atualizado com sucesso
+
     if (customerService.updateStatus(id, status)) {
-        // Caso o status seja atualizado com sucesso
+
         SuccessResponse successResponse = new SuccessResponse("Status do cliente atualizado com sucesso!", null);
-        return ResponseEntity.ok(successResponse);  // Retorna a resposta de sucesso com a mensagem
+        return ResponseEntity.ok(successResponse);  
     }
 
-    // Caso o cliente com o ID não seja encontrado
+   
     ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta de erro 404
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 }
 
 
@@ -212,16 +212,16 @@ public ResponseEntity<Object> updateStatus(@PathVariable Long id, @RequestParam 
                  content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
 })
 public ResponseEntity<Object> delete(@PathVariable Long id) {
-    // Verifica se o cliente foi excluído com sucesso
+
     if (customerService.delete(id)) {
-        // Caso o cliente seja excluído com sucesso, usa o código 200 OK
+ 
         SuccessResponse successResponse = new SuccessResponse("Cliente excluído com sucesso!", null);
-        return ResponseEntity.ok(successResponse);  // Retorna a resposta 200 com a mensagem de sucesso
+        return ResponseEntity.ok(successResponse);  
     }
 
-    // Caso o cliente com o ID não seja encontrado, retorna 404
+
     ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta 404 com a mensagem de erro
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse); 
 }
 
 
