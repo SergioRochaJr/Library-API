@@ -70,6 +70,7 @@ public class CustomerController {
     }
 }
 
+
     @GetMapping("/{id}")
     @Operation(summary = "Obter cliente por ID", description = "Busca os detalhes de um cliente pelo ID")
     @ApiResponse(responseCode = "200", description = "Cliente encontrado")
@@ -83,6 +84,7 @@ public class CustomerController {
         }
     ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
     }
 
     @GetMapping("/birthdate/{birthDate}")

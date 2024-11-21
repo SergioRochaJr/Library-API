@@ -41,7 +41,7 @@ public class BookController {
     @Autowired
     private ValidationService validationService;
 
-    @GetMapping
+@GetMapping
 @Operation(summary = "Listar livros", description = "Retorna todos os livros ou um específico, baseado no ID")
 @ApiResponse(responseCode = "200", description = "Lista de livros retornada com sucesso")
 @ApiResponse(responseCode = "404", description = "Livro não encontrado")
@@ -66,25 +66,10 @@ public ResponseEntity<Object> getAll(@RequestParam(required = false) Long id) {
         // Se livros forem encontrados, retorna a resposta de sucesso
         SuccessResponse successResponse = new SuccessResponse("Lista de livros retornada com sucesso", books);
         return ResponseEntity.ok(successResponse);
+
     }
 }
 
-
-@GetMapping("/{id}")
-@Operation(summary = "Obter livro por ID", description = "Busca os detalhes de um livro pelo ID")
-@ApiResponse(responseCode = "200", description = "Livro encontrado")
-@ApiResponse(responseCode = "404", description = "Livro não encontrado")
-public ResponseEntity<Object> getById(@PathVariable("id") Long id) {
-    BookDTO bookDTO = bookService.findById(id);
-    if (bookDTO != null) {
-        // Se o livro for encontrado, retorna uma resposta de sucesso
-        SuccessResponse successResponse = new SuccessResponse("Livro encontrado com sucesso", bookDTO);
-        return ResponseEntity.ok(successResponse);
-    }
-    // Se o livro não for encontrado, retorna uma resposta de erro
-    ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado com o ID " + id);
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-}
 
 
 @PostMapping
@@ -131,10 +116,9 @@ public ResponseEntity<Object> update(@RequestBody BookDTO bookDTO) {
             SuccessResponse successResponse = new SuccessResponse("Livro atualizado com sucesso", bookDTO);
             return ResponseEntity.ok(successResponse);
         }
-
-        // Caso o livro não seja encontrado
-        ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado para atualização");
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+          // Caso o livro não seja encontrado
+          ErrorResponse errorResponse = new ErrorResponse("Livro não encontrado para atualização");
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 
     } catch (IllegalArgumentException e) {
         // Criando a resposta de erro de validação

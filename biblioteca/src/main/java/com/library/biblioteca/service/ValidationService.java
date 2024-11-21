@@ -49,7 +49,7 @@ public class ValidationService {
         }
 
         // Expressão regular para permitir letras, espaços e hífens, mas não permite caracteres especiais
-        String authorPattern = "^[A-Za-zÀ-ÿ0-9\\s-]+$";  // Letras, números, espaços e hífens
+        String authorPattern = "^[A-Za-zÀ-ÿ0-9\\s-.]+$";  // Letras, números, espaços e hífens
         Pattern pattern = Pattern.compile(authorPattern);
         Matcher matcher = pattern.matcher(author);
 
@@ -61,7 +61,7 @@ public class ValidationService {
     public void validateCustomer(Customer customer) {
         if (customer.getName() == null || customer.getName().isEmpty()) {
             throw new IllegalArgumentException("O nome do cliente não pode ser vazio");
-        }
+        }   
         
         // Validação para garantir que o nome contenha apenas letras e espaços
         if (!customer.getName().matches("^[a-zA-ZÀ-ÿ\\s]+$")) {
