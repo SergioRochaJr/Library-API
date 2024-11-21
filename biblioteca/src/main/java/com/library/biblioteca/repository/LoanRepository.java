@@ -12,4 +12,6 @@ import com.library.biblioteca.model.Loan;
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findByCustomerId(Long customerId);
     List<Loan> findByLoanDateBetween(LocalDate startDate, LocalDate endDate);
+    List<Loan> findBookById(Long book_idLong);
+
 }

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.library.biblioteca.dto.CustomerDTO;
+import com.library.biblioteca.exception.SuccessResponse;
 import com.library.biblioteca.model.Customer;
 import com.library.biblioteca.model.CustomerStatus;
 import com.library.biblioteca.model.ErrorResponse;
@@ -50,110 +51,178 @@ public class CustomerController {
     @GetMapping
     @Operation(summary = "Listar clientes", description = "Retorna todos os clientes ou busca por nome")
     @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso")
-    public ResponseEntity<List<CustomerDTO>> getAll(@RequestParam(required = false) String name) {
+    public ResponseEntity<Object> getAll(@RequestParam(required = false) String name) {
         List<Customer> customers;
         if (name != null && !name.isEmpty()) {
             customers = customerService.findByName(name);
         } else {
             customers = customerService.findAll();
         }
-        List<CustomerDTO> customerDTOs = customers.stream()
-                                                  .map(CustomerMapper::toDTO)
-                                                  .collect(Collectors.toList());
-        return ResponseEntity.ok(customerDTOs);
+        if (!customers.isEmpty()) {
+            List<CustomerDTO> customerDTOs = customers.stream()
+                                                      .map(CustomerMapper::toDTO)
+                                                      .collect(Collectors.toList());
+            SuccessResponse successResponse = new SuccessResponse("Lista de clientes retornada com sucesso!", customerDTOs);
+            return ResponseEntity.ok(successResponse);
+    } else{
+        ErrorResponse errorResponse = new ErrorResponse("Nenhum cliente encontrado com o nome: " + name);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+}
 
 
     @GetMapping("/{id}")
     @Operation(summary = "Obter cliente por ID", description = "Busca os detalhes de um cliente pelo ID")
     @ApiResponse(responseCode = "200", description = "Cliente encontrado")
     @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-    public ResponseEntity<CustomerDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<Object> getById(@PathVariable Long id) {
         Customer customer = customerService.findById(id);
         if (customer != null) {
-            return ResponseEntity.ok(CustomerMapper.toDTO(customer));
-        }   
-        return ResponseEntity.notFound().build();
+            CustomerDTO customerDTO = CustomerMapper.toDTO(customer);
+            SuccessResponse successResponse = new SuccessResponse("Cliente encontrado com sucesso!", customerDTO);
+        return ResponseEntity.ok(successResponse);
+        }
+    ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
     }
 
-@GetMapping("/birthdate/{birthDate}")
-@Operation(
-    summary = "Buscar clientes por data de nascimento",
-    description = "Retorna uma lista de clientes que possuem a data de nascimento fornecida."
-)
-@ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Clientes encontrados", content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerDTO.class)))),
-    @ApiResponse(responseCode = "404", description = "Nenhum cliente encontrado para a data de nascimento fornecida")
-})
-    public ResponseEntity<List<CustomerDTO>> getByBirthDate(@PathVariable("birthDate") LocalDate birthDate) {
+    @GetMapping("/birthdate/{birthDate}")
+    @Operation(
+        summary = "Buscar clientes por data de nascimento",
+        description = "Retorna uma lista de clientes que possuem a data de nascimento fornecida."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Clientes encontrados", 
+                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = CustomerDTO.class)))),
+        @ApiResponse(responseCode = "404", description = "Nenhum cliente encontrado para a data de nascimento fornecida", 
+                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Object> getByBirthDate(@PathVariable("birthDate") LocalDate birthDate) {
         List<Customer> customers = customerService.findByBirthDate(birthDate);
+        
         if (!customers.isEmpty()) {
             List<CustomerDTO> customerDTOs = customers.stream()
                                                       .map(CustomerMapper::toDTO)
                                                       .collect(Collectors.toList());
-            return ResponseEntity.ok(customerDTOs);
+            SuccessResponse successResponse = new SuccessResponse("Clientes encontrados com sucesso!", customerDTOs);
+            return ResponseEntity.ok(successResponse);
         }
-        return ResponseEntity.notFound().build();
+        
+        ErrorResponse errorResponse = new ErrorResponse("Nenhum cliente encontrado para a data de nascimento: " + birthDate);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
+    
 
     @PostMapping
-    @Operation(summary = "Criar cliente", description = "Adiciona um novo cliente ao sistema")
-    @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso")
-    @ApiResponse(responseCode = "400", description = "Erro de validação")
-    public ResponseEntity<Object> create(@RequestBody CustomerDTO customerDTO) {
-        try {
-            Customer customer = CustomerMapper.toEntity(customerDTO);
-            validationService.validateCustomer(customer);
-            customerService.create(customerDTO);
-            URI location = ServletUriComponentsBuilder
-                    .fromCurrentRequest()
-                    .path("/{id}")
-                    .buildAndExpand(customer.getId())
-                    .toUri();
-            return ResponseEntity.created(location).body(CustomerMapper.toDTO(customer));
-        } catch (IllegalArgumentException e) {
-            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+@Operation(summary = "Criar cliente", description = "Adiciona um novo cliente ao sistema")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = CustomerDTO.class))),
+    @ApiResponse(responseCode = "400", description = "Erro de validação", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+})
+public ResponseEntity<Object> create(@RequestBody CustomerDTO customerDTO) {
+    try {
+        Customer customer = CustomerMapper.toEntity(customerDTO);
+        validationService.validateCustomer(customer);  // Valida os dados
+        customerService.create(customerDTO);  // Cria o cliente no banco
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(customer.getId())
+                .toUri();
+        
+        // Resposta de sucesso com o objeto CustomerDTO e a URI no cabeçalho Location
+        SuccessResponse successResponse = new SuccessResponse("Cliente criado com sucesso!", CustomerMapper.toDTO(customer));
+        return ResponseEntity.created(location).body(successResponse);
+        
+    } catch (IllegalArgumentException e) {
+        // Resposta de erro com a mensagem de validação
+        ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+}
+
+
+@PutMapping("/{id}")
+@Operation(summary = "Atualizar cliente", description = "Atualiza as informações de um cliente existente")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = CustomerDTO.class))),
+    @ApiResponse(responseCode = "404", description = "Cliente não encontrado", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
+    @ApiResponse(responseCode = "400", description = "Erro de validação", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+})
+public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody CustomerDTO customerDTO) {
+    try {
+        // Mapeia o DTO para entidade para atualizar no banco de dados
+        Customer customer = CustomerMapper.toEntity(customerDTO);
+        // Valida os dados do cliente
+        validationService.validateCustomer(customer);
+
+        // Se a atualização for bem-sucedida
+        if (customerService.update(id, customerDTO)) {
+            SuccessResponse successResponse = new SuccessResponse("Cliente atualizado com sucesso!", CustomerMapper.toDTO(customer));
+            return ResponseEntity.ok(successResponse);  // Retorna a resposta de sucesso com os dados do cliente
         }
+
+        // Caso o cliente não seja encontrado
+        ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta de erro 404
+
+    } catch (IllegalArgumentException e) {
+        // Caso haja um erro de validação
+        ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);  // Retorna a resposta de erro 400
+    }
+}
+
+
+@PatchMapping("/{id}/status")
+@Operation(summary = "Alterar status do cliente", description = "Modifica o status do cliente")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class))),
+    @ApiResponse(responseCode = "404", description = "Cliente não encontrado", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+})
+public ResponseEntity<Object> updateStatus(@PathVariable Long id, @RequestParam CustomerStatus status) {
+    // Verifica se o status foi atualizado com sucesso
+    if (customerService.updateStatus(id, status)) {
+        // Caso o status seja atualizado com sucesso
+        SuccessResponse successResponse = new SuccessResponse("Status do cliente atualizado com sucesso!", null);
+        return ResponseEntity.ok(successResponse);  // Retorna a resposta de sucesso com a mensagem
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar cliente", description = "Atualiza as informações de um cliente existente")
-    @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-    public ResponseEntity<Object> update(@PathVariable Long id, @RequestBody com.library.biblioteca.dto.CustomerDTO customerDTO) {
-        try {
-            Customer customer = CustomerMapper.toEntity(customerDTO);
-            validationService.validateCustomer(customer);
-            if (customerService.update(id, customerDTO)) {
-                return ResponseEntity.ok(CustomerMapper.toDTO(customer));
-            }
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            ErrorResponse errorResponse = new ErrorResponse("Erro de validação: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+    // Caso o cliente com o ID não seja encontrado
+    ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta de erro 404
+}
+
+
+@DeleteMapping("/{id}")
+@Operation(summary = "Excluir cliente", description = "Remove um cliente do sistema")
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Cliente excluído com sucesso", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class))),
+    @ApiResponse(responseCode = "404", description = "Cliente não encontrado", 
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
+})
+public ResponseEntity<Object> delete(@PathVariable Long id) {
+    // Verifica se o cliente foi excluído com sucesso
+    if (customerService.delete(id)) {
+        // Caso o cliente seja excluído com sucesso, usa o código 200 OK
+        SuccessResponse successResponse = new SuccessResponse("Cliente excluído com sucesso!", null);
+        return ResponseEntity.ok(successResponse);  // Retorna a resposta 200 com a mensagem de sucesso
     }
 
-    @PatchMapping("/{id}/status")
-    @Operation(summary = "Alterar status do cliente", description = "Modifica o status do cliente")
-    @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-    public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam CustomerStatus status) {
-        if (customerService.updateStatus(id, status)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+    // Caso o cliente com o ID não seja encontrado, retorna 404
+    ErrorResponse errorResponse = new ErrorResponse("Cliente não encontrado com o ID " + id);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);  // Retorna a resposta 404 com a mensagem de erro
+}
 
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Excluir cliente", description = "Remove um cliente do sistema")
-    @ApiResponse(responseCode = "204", description = "Cliente excluído com sucesso")
-    @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (customerService.delete(id)) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
-    }
+
 }

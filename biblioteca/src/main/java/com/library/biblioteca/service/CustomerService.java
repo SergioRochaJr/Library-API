@@ -11,6 +11,7 @@ import com.library.biblioteca.dto.CustomerDTO;
 import com.library.biblioteca.exception.CustomerValidation;
 import com.library.biblioteca.model.Customer;
 import com.library.biblioteca.model.CustomerStatus;
+import com.library.biblioteca.model.LoanStatus;
 import com.library.biblioteca.repository.CustomerRepository;
 import com.library.biblioteca.util.CustomerMapper;
 
@@ -79,10 +80,10 @@ public boolean update(Long id, CustomerDTO updatedCustomerDTO) {
         Optional<Customer> existingCustomer = customerRepository.findById(id);
         if (existingCustomer.isPresent()) {
             Customer customer = existingCustomer.get();
-            if (customer.getLoans().isEmpty()) {
-                customerRepository.deleteById(id);
-                return true;
-            }
+            if (customer.getLoans().stream().allMatch(loan -> loan.getStatus() == LoanStatus.RETURNED)) {
+    customerRepository.deleteById(id);
+    return true;
+        }
         }
         return false;
     }
