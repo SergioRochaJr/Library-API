@@ -1,9 +1,13 @@
 package com.library.biblioteca.service;
 
 import com.library.biblioteca.dto.BookDTO;
+
 import com.library.biblioteca.model.Book;
 import com.library.biblioteca.model.BookStatus;
+import com.library.biblioteca.model.Loan;
+import com.library.biblioteca.model.LoanStatus;
 import com.library.biblioteca.repository.BookRepository;
+import com.library.biblioteca.repository.LoanRepository;
 import com.library.biblioteca.util.BookMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,9 @@ public class BookService {
 
     @Autowired
     private BookRepository bookRepository;
+
+    @Autowired
+    private LoanRepository loanRepository;
 
     @Autowired
     private ValidationService validationService;  // Serviço de validação centralizado
@@ -65,12 +72,31 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    // Deletar livro (permanece o mesmo, pois não altera a lógica de DTO)
     public boolean delete(Long id) {
-        if (bookRepository.existsById(id)) {
-            bookRepository.deleteById(id);
-            return true;
+        // Verificar se o livro existe
+        Optional<Book> optionalBook = bookRepository.findById(id);
+        if (optionalBook.isPresent()) {
+            Book book = optionalBook.get();
+    
+            // Buscar todos os empréstimos que possuem o livro no relacionamento
+            List<Loan> loans = loanRepository.findBookById(id);
+    
+            // Verificar se todos os empréstimos possuem status RETURNED
+            boolean allLoansReturned = loans.stream()
+                    .allMatch(loan -> loan.getStatus() == LoanStatus.RETURNED);
+    
+            // Verificar se o status do livro não é BORROWED
+            boolean bookIsNotBorrowed = book.getStatus() != BookStatus.BORROWED;
+    
+            // Se todos os empréstimos estiverem com status RETURNED e o livro não estiver com status BORROWED, excluir o livro
+            if (allLoansReturned && bookIsNotBorrowed) {
+                bookRepository.deleteById(id);
+                return true;  // Livro excluído com sucesso
+            }
         }
+        // Caso o livro tenha empréstimos não retornados ou o status do livro seja BORROWED
         return false;
     }
+    
+
 }

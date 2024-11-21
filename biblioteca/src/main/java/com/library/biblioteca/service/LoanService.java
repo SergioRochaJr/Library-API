@@ -25,6 +25,12 @@ public class LoanService {
         return loanRepository.findById(id).orElse(null);
     }
 
+    public Loan findByBookId(Long book_id) {
+        return loanRepository.findById(book_id).orElse(null);
+    }
+
+    
+
     public List<Loan> findByCustomerId(Long customerId) {
         return loanRepository.findByCustomerId(customerId);
     }
